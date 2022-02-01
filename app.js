@@ -1,14 +1,6 @@
-const express = require('express');
 const inquirer = require('inquirer')
 // Import and require mysql2
 const mysql = require('mysql2');
-require('.dotenv').config();
-const PORT = process.env.PORT || 3001;
-const app = express();
-
-// Express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
 
 // Connect to database
 const db = mysql.createConnection(
@@ -17,17 +9,11 @@ const db = mysql.createConnection(
     // MySQL username,
     user: 'root',
     // MySQL password
-    password: process.env.DB_PASSWORD,
+    password: 'ShartMan69420!',
     database: 'employee_db'
   },
   console.log(`Connected to the employee_db database.`)
 );
-
-db.connect((err)=>{
-    if (err){
-        throw err;
-    } else questions ();
-})
 
 
 const questions = () => {
@@ -35,59 +21,164 @@ const questions = () => {
         .prompt({
             type: "list",
             message: "What would you like to do?",
-            choices: ["View All Employees", "Add Employee", "Update Employee Role", "View All Roles", "Add Role", "View All Departments", "Add Department"],
+            choices: ["View All Employees", "Add Employee", "Update Employee Role", "View All Roles", "Add Role", "View All Departments", "Add Department", "Quit"],
             name: "init"
         })
         .then((answer)=> {
             switch (answer.init) {
                 case "View All Employees":
-                    
-                    break;
-            
-                default:
+                    viewEmployees();
                     break;
                 case "Add Employee":
-                    
-                    break;
-            
-                default:
+                    addEmployees();
                     break;
                 case "Update Employee Role":
-                    
-                    break;
-            
-                default:
+                    updateEmpRole();
                     break;
                 case "View All Roles":
-                    
-                    break;
-            
-                default:
+                    viewRoles();
                     break;
                 case "Add Role":
-                    
-                    break;
-            
-                default:
+                    addRoles();
                     break;
                 case "View All Departments":
-                    
-                    break;
-            
-                default:
+                    viewDepartments();
                     break;
                 case "Add Department":
-                    
+                    addDepartment();
                     break;
-            
                 default:
+                    quit();
                     break;
             }
         })
 }
 
+const quit = () => {
+    console.log("Good-Bye");
+    return db.end();
+}
 
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const viewEmployees = () => {
+    db.query("SELECT * FROM employee", (err, data) => {
+        if (err){
+            throw err;
+        } else {
+            console.table(data);
+            questions();
+        }
+    })
+}
+
+const viewDepartments = () => {
+    db.query("SELECT * FROM department", (err, data) => {
+        if (err){
+            throw err;
+        } else {
+            console.table(data);
+            questions();
+        }
+    })
+}
+
+const viewRoles = () => {
+    db.query("SELECT * FROM roles", (err, data) => {
+        if (err){
+            throw err;
+        } else {
+            console.table(data);
+            questions();
+        }
+    })
+}
+
+const addDepartment = () => {
+    inquirer
+    .prompt ([{
+        type: 'input',
+        message: "What is the new department's name?",
+        name: 'newDepartment'
+    }])
+    .then((answer)=>{
+        db.query(
+            "INSERT INTO department SET ?", {department_name: answer.newDepartment}, (err, data) => {
+                if (err) throw err
+                console.log('Added new Department! \n ===========')
+                questions();
+            }
+        )
+    })
+}
+
+const addRoles = () => {
+    inquirer
+    .prompt ([
+        {
+        type: 'input',
+        message: "What is the new role?",
+        name: 'newRoleTitle'
+        },
+        {
+            type: 'number',
+            message: "What is the salary of the new role?",
+            name: 'newRoleSalary'
+        },
+        {
+            type: 'number',
+            message: 'What Department is this role apart of? (department #)',
+            name: 'newRoleDepartment'
+        }
+    ])
+    .then((answer)=>{
+        db.query(
+            "INSERT INTO roles SET ?", {title: answer.newRoleTitle, salary: answer.newRoleSalary, department_id: answer.newRoleDepartment}, (err, data) => {
+                if (err) throw err
+                console.log('Added new Role! \n ===========')
+                questions();
+            }
+        )
+    })
+}
+
+const addEmployees = () => {
+    inquirer
+    .prompt([
+        {
+            type: 'input',
+            message: 'What is the first name of the new Employee?',
+            name: 'firstName'   
+        },
+        {
+            type: 'input',
+            message: 'What is the last name of the new Employee?',
+            name: 'lastName'   
+        },
+        {
+            type: 'number',
+            message: 'What is the role Id that the new Employee belongs to?',
+            name: 'roleId'   
+        },
+        {
+            type: 'number',
+            message: 'What is the Id of the new Employees manager?',
+            name: 'managerId'   
+        }
+    ])
+    .then((answer)=>{
+        db.query(
+            "INSERT INTO employee SET ?", {first_name: answer.firstName, last_name: answer.lastName, role_id: answer.roleId, manager_id: answer.managerId}, (err, data) => {
+                if (err) throw err
+                console.log('Added new Employee! \n ===========')
+                questions();
+            }
+        )
+    })
+}
+
+const updateEmpRole = () => {
+    questions();
+}
+
+
+questions();
