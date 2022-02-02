@@ -1,6 +1,11 @@
 const inquirer = require("inquirer");
 // Import and require mysql2
 const mysql = require("mysql2");
+const figlet = require('figlet');
+
+console.log(
+        figlet.textSync('Employee Manager', { horizontalLayout: 'defualt' })
+)
 
 // Connect to database
 const db = mysql.createConnection(
@@ -67,13 +72,15 @@ const questions = () => {
 };
 
 const quit = () => {
-  console.log("Good-Bye");
+  console.log(
+      figlet.textSync("Good-Bye", { horizontalLayout: 'defualt' })
+  );
   return db.end();
 };
 
 const viewEmployees = () => {
   db.query(
-    "SELECT e.id, e.first_name, e.last_name, roles.title AS Job_Title, department.department_name AS Department, roles.salary, CONCAT(m.first_name, ' ', m.last_name) AS Manager FROM employee e JOIN roles ON e.role_id = roles.id JOIN department ON roles.department_id = department.id INNER JOIN employee m ON m.id = e.manager_id ORDER BY id ASC", 
+    "SELECT e.id, e.first_name, e.last_name, roles.title AS Job_Title, department.department_name AS Department, roles.salary, CONCAT(m.first_name, ' ', m.last_name) AS Manager FROM employee e JOIN roles ON e.role_id = roles.id JOIN department ON roles.department_id = department.id LEFT JOIN employee m ON m.id = e.manager_id ORDER BY id ASC", 
     (err, data) => {
       if (err) {
         throw err;
@@ -410,9 +417,9 @@ const deleteRole = () => {
       ])
       .then((answer) => {
         const roleDelete = answer.roleDelete
-        db.query("DELETE FROM department WHERE id = ?", [roleDelete], (err, data)=>{
+        db.query("DELETE FROM roles WHERE id = ?", [roleDelete], (err, data)=>{
           if (err) throw err;
-          console.log('Deleted Department :( \n ==========');
+          console.log('Deleted role :( \n ==========');
           questions();
         })
       })
@@ -438,9 +445,9 @@ const deleteEmployee = () => {
       ])
       .then((answer) => {
         const empDelete = answer.empDelete
-        db.query("DELETE FROM department WHERE id = ?", [empDelete], (err, data)=>{
+        db.query("DELETE FROM employee WHERE id = ?", [empDelete], (err, data)=>{
           if (err) throw err;
-          console.log('Deleted Department :( \n ==========');
+          console.log('Deleted Employee :( \n ==========');
           questions();
         })
       })
