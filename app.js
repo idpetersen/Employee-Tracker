@@ -1,23 +1,32 @@
 const inquirer = require("inquirer");
 // Import and require mysql2
+require("dotenv").config();
 const mysql = require("mysql2");
-const figlet = require('figlet');
+const CFonts = require("cfonts");
 
-console.log(
-        figlet.textSync('Employee Manager', { horizontalLayout: 'defualt' })
-)
+CFonts.say("Employee|Manager", {
+  font: "block",
+  align: "left",
+  colors: ["yellow"],
+  background: "transparent",
+  letterSpacing: 1,
+  lineHeight: 1,
+  space: true,
+  maxLength: "0",
+  env: "node",
+});
 
 // Connect to database
 const db = mysql.createConnection(
   {
     host: "localhost",
     // MySQL username,
-    user: "root",
+    user: process.env.DB_USER,
     // MySQL password",
-    password: "password",
-    database: "employee_db",
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
   },
-  console.log(`Connected to the employee_db database.`)
+  console.log(`Connected to the database.`)
 );
 
 const questions = () => {
@@ -72,15 +81,24 @@ const questions = () => {
 };
 
 const quit = () => {
-  console.log(
-      figlet.textSync("Good-Bye", { horizontalLayout: 'defualt' })
-  );
+  CFonts.say("Good Bye!", {
+    font: "block",
+    align: "left",
+    colors: ["yellow"],
+    background: "transparent",
+    letterSpacing: 1,
+    lineHeight: 1,
+    space: true,
+    maxLength: "0",
+    env: "node",
+  });
+
   return db.end();
 };
 
 const viewEmployees = () => {
   db.query(
-    "SELECT e.id, e.first_name, e.last_name, roles.title AS Job_Title, department.department_name AS Department, roles.salary, CONCAT(m.first_name, ' ', m.last_name) AS Manager FROM employee e JOIN roles ON e.role_id = roles.id JOIN department ON roles.department_id = department.id LEFT JOIN employee m ON m.id = e.manager_id ORDER BY id ASC", 
+    "SELECT e.id, e.first_name, e.last_name, roles.title AS Job_Title, department.department_name AS Department, roles.salary, CONCAT(m.first_name, ' ', m.last_name) AS Manager FROM employee e JOIN roles ON e.role_id = roles.id JOIN department ON roles.department_id = department.id LEFT JOIN employee m ON m.id = e.manager_id ORDER BY id ASC",
     (err, data) => {
       if (err) {
         throw err;
@@ -124,15 +142,17 @@ const addDepartment = () => {
         type: "input",
         message: "What is the new department's name?",
         name: "newDepartment",
-        validate: function (name){
-          valid = /^[A-Za-z\s]*$/.test(name)
-          if (valid){
-              return true;
+        validate: function (name) {
+          valid = /^[A-Za-z\s]*$/.test(name);
+          if (valid) {
+            return true;
           } else {
-              console.log("\n Department name should not include numbers (unless you're a cyborg)")
-              return false;
+            console.log(
+              "\n Department name should not include numbers (unless you're a cyborg)"
+            );
+            return false;
           }
-        }
+        },
       },
     ])
     .then((answer) => {
@@ -141,7 +161,7 @@ const addDepartment = () => {
         { department_name: answer.newDepartment },
         (err, data) => {
           if (err) throw err;
-          console.log("Added new Department! \n ===========");
+          console.log("Added new Department! \n =====================");
           questions();
         }
       );
@@ -162,29 +182,33 @@ const addRoles = () => {
           type: "input",
           message: "What is the new role?",
           name: "newRoleTitle",
-          validate: function (name){
-            valid = /^[A-Za-z\s]*$/.test(name)
-            if (valid){
-                return true;
+          validate: function (name) {
+            valid = /^[A-Za-z\s]*$/.test(name);
+            if (valid) {
+              return true;
             } else {
-                console.log("\n Role name should not include numbers (unless you're a cyborg)")
-                return false;
+              console.log(
+                "\n Role name should not include numbers (unless you're a cyborg)"
+              );
+              return false;
             }
-          }
+          },
         },
         {
           type: "number",
           message: "What is the salary of the new role?",
           name: "newRoleSalary",
-          validate: function (id){
-            valid = /^[0-9]*$/.test(id)
-            if (valid){
-                return true;
+          validate: function (id) {
+            valid = /^[0-9]*$/.test(id);
+            if (valid) {
+              return true;
             } else {
-                console.log("\n Salary should not include special characters or letters")
-                return false;
+              console.log(
+                "\n Salary should not include special characters or letters"
+              );
+              return false;
             }
-          }
+          },
         },
         {
           type: "list",
@@ -203,7 +227,7 @@ const addRoles = () => {
           },
           (err, data) => {
             if (err) throw err;
-            console.log("Added new Role! \n ===========");
+            console.log("Added new Role! \n =====================");
             questions();
           }
         );
@@ -235,29 +259,33 @@ const addEmployees = () => {
             type: "input",
             message: "What is the first name of the new Employee?",
             name: "firstName",
-            validate: function (name){
-              valid = /^[A-Za-z\s]*$/.test(name)
-              if (valid){
-                  return true;
+            validate: function (name) {
+              valid = /^[A-Za-z\s]*$/.test(name);
+              if (valid) {
+                return true;
               } else {
-                  console.log("\n First name should not include numbers (unless you're a cyborg)")
-                  return false;
+                console.log(
+                  "\n First name should not include numbers (unless you're a cyborg)"
+                );
+                return false;
               }
-            }
+            },
           },
           {
             type: "input",
             message: "What is the last name of the new Employee?",
             name: "lastName",
-            validate: function (name){
-              valid = /^[A-Za-z\s]*$/.test(name)
-              if (valid){
-                  return true;
+            validate: function (name) {
+              valid = /^[A-Za-z\s]*$/.test(name);
+              if (valid) {
+                return true;
               } else {
-                  console.log("\n Last name should not include numbers (unless you're a cyborg)")
-                  return false;
+                console.log(
+                  "\n Last name should not include numbers (unless you're a cyborg)"
+                );
+                return false;
               }
-            }
+            },
           },
           {
             type: "list",
@@ -274,7 +302,6 @@ const addEmployees = () => {
         ])
 
         .then((answer) => {
-          console.log(answer);
           db.query(
             "INSERT INTO employee SET ?",
             {
@@ -285,7 +312,7 @@ const addEmployees = () => {
             },
             (err, data) => {
               if (err) throw err;
-              console.log("Added new Employee! \n ===========");
+              console.log("Added new Employee! \n =====================");
               questions();
             }
           );
@@ -328,14 +355,16 @@ const updateEmpRole = () => {
           },
         ])
         .then((answer) => {
-          const empUpdate = answer.empUpdate
-          const roleUpdate = answer.roleUpdate
-          db.query("UPDATE employee SET role_id = ? WHERE id = ?;",[roleUpdate, empUpdate],
-          (err, data)=>{
-            if (err) throw err;
-            console.log('Employee updated! \n ==========');
-            questions();
-          }
+          const empUpdate = answer.empUpdate;
+          const roleUpdate = answer.roleUpdate;
+          db.query(
+            "UPDATE employee SET role_id = ? WHERE id = ?;",
+            [roleUpdate, empUpdate],
+            (err, data) => {
+              if (err) throw err;
+              console.log("Employee updated! \n =====================");
+              questions();
+            }
           );
         });
     });
@@ -346,29 +375,29 @@ const deleting = () => {
   inquirer
     .prompt([
       {
-        type: 'list',
-        message: 'What would you like to delete?',
-        choices: ['Department', 'Role', 'Employee', 'Return to Main Menu'],
-        name: 'deleteChoice'
-      }
+        type: "list",
+        message: "What would you like to delete?",
+        choices: ["Department", "Role", "Employee", "Return to Main Menu"],
+        name: "deleteChoice",
+      },
     ])
-    .then((answer) =>{
+    .then((answer) => {
       switch (answer.deleteChoice) {
-        case 'Department':
+        case "Department":
           deleteDepartment();
           break;
-        case 'Role':
+        case "Role":
           deleteRole();
           break;
-        case 'Employee':
+        case "Employee":
           deleteEmployee();
           break;
         default:
           questions();
           break;
       }
-    })
-}
+    });
+};
 
 const deleteDepartment = () => {
   db.query("SELECT * FROM department", (err, data) => {
@@ -381,22 +410,26 @@ const deleteDepartment = () => {
     inquirer
       .prompt([
         {
-          type: 'list',
+          type: "list",
           choices: departmentArr,
-          message: 'Which Department would you like to delete?',
-          name: 'depDelete',
-        }
+          message: "Which Department would you like to delete?",
+          name: "depDelete",
+        },
       ])
       .then((answer) => {
-        const depDelete = answer.depDelete
-        db.query("DELETE FROM department WHERE id = ?", [depDelete], (err, data)=>{
-          if (err) throw err;
-          console.log('Deleted Department :( \n ==========');
-          questions();
-        })
-      })
+        const depDelete = answer.depDelete;
+        db.query(
+          "DELETE FROM department WHERE id = ?",
+          [depDelete],
+          (err, data) => {
+            if (err) throw err;
+            console.log("Deleted Department :( \n =====================");
+            questions();
+          }
+        );
+      });
   });
-}
+};
 
 const deleteRole = () => {
   db.query("SELECT * FROM roles", (err, data) => {
@@ -409,22 +442,26 @@ const deleteRole = () => {
     inquirer
       .prompt([
         {
-          type: 'list',
+          type: "list",
           choices: rolesArr,
-          message: 'Which Role would you like to delete?',
-          name: 'roleDelete',
-        }
+          message: "Which Role would you like to delete?",
+          name: "roleDelete",
+        },
       ])
       .then((answer) => {
-        const roleDelete = answer.roleDelete
-        db.query("DELETE FROM roles WHERE id = ?", [roleDelete], (err, data)=>{
-          if (err) throw err;
-          console.log('Deleted role :( \n ==========');
-          questions();
-        })
-      })
+        const roleDelete = answer.roleDelete;
+        db.query(
+          "DELETE FROM roles WHERE id = ?",
+          [roleDelete],
+          (err, data) => {
+            if (err) throw err;
+            console.log("Deleted role :( \n =====================");
+            questions();
+          }
+        );
+      });
   });
-}
+};
 
 const deleteEmployee = () => {
   db.query("SELECT * FROM employee", (err, data) => {
@@ -432,26 +469,33 @@ const deleteEmployee = () => {
       throw err;
     }
     const employeeArr = data.map(function (employee) {
-      return { name: employee.first_name + ' ' + employee.last_name, value: employee.id };
+      return {
+        name: employee.first_name + " " + employee.last_name,
+        value: employee.id,
+      };
     });
     inquirer
       .prompt([
         {
-          type: 'list',
+          type: "list",
           choices: employeeArr,
-          message: 'Which Employee would you like to delete?',
-          name: 'empDelete',
-        }
+          message: "Which Employee would you like to delete?",
+          name: "empDelete",
+        },
       ])
       .then((answer) => {
-        const empDelete = answer.empDelete
-        db.query("DELETE FROM employee WHERE id = ?", [empDelete], (err, data)=>{
-          if (err) throw err;
-          console.log('Deleted Employee :( \n ==========');
-          questions();
-        })
-      })
+        const empDelete = answer.empDelete;
+        db.query(
+          "DELETE FROM employee WHERE id = ?",
+          [empDelete],
+          (err, data) => {
+            if (err) throw err;
+            console.log("Deleted Employee :( \n =====================");
+            questions();
+          }
+        );
+      });
   });
-}
+};
 
 questions();
